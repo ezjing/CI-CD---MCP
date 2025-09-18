@@ -61,16 +61,16 @@ export default function OllamaChat({ className = "" }: OllamaChatProps) {
   return (
     <div className={`flex flex-col h-full ${className}`}>
       {/* 헤더 */}
-      <div className="flex items-center justify-between p-4 border-b bg-gray-50">
+      <div className="flex items-center justify-between p-4 border-b bg-white">
         <div className="flex items-center space-x-4">
-          <h2 className="text-lg font-semibold">Ollama Chat</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Ollama Chat</h2>
           <div className="flex items-center space-x-2">
             <div
               className={`w-2 h-2 rounded-full ${
                 isHealthy ? "bg-green-500" : "bg-red-500"
               }`}
             />
-            <span className="text-sm text-gray-600">
+            <span className="text-sm font-medium text-gray-700">
               {isHealthy === null
                 ? "Checking..."
                 : isHealthy
@@ -84,7 +84,7 @@ export default function OllamaChat({ className = "" }: OllamaChatProps) {
           <select
             value={selectedModel}
             onChange={(e) => setSelectedModel(e.target.value)}
-            className="px-3 py-1 border rounded-md text-sm"
+            className="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             disabled={modelsLoading}
           >
             {modelsLoading ? (
@@ -123,11 +123,11 @@ export default function OllamaChat({ className = "" }: OllamaChatProps) {
       )}
 
       {/* 메시지 목록 */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
         {messages.length === 0 ? (
-          <div className="text-center text-gray-500 py-8">
-            <p>Ollama와 대화를 시작해보세요!</p>
-            <p className="text-sm mt-2">
+          <div className="text-center text-gray-600 py-8">
+            <p className="font-medium">Ollama와 대화를 시작해보세요!</p>
+            <p className="text-sm mt-2 text-gray-500">
               메시지를 입력하고 Enter를 누르거나 전송 버튼을 클릭하세요.
             </p>
           </div>
@@ -142,8 +142,8 @@ export default function OllamaChat({ className = "" }: OllamaChatProps) {
               <div
                 className={`max-w-[80%] rounded-lg px-4 py-2 ${
                   message.role === "user"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-800"
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-gray-800 border border-gray-200"
                 }`}
               >
                 <div className="whitespace-pre-wrap">{message.content}</div>
@@ -174,21 +174,21 @@ export default function OllamaChat({ className = "" }: OllamaChatProps) {
       </div>
 
       {/* 입력 폼 */}
-      <div className="p-4 border-t bg-gray-50">
+      <div className="p-4 border-t bg-white">
         <form onSubmit={handleSubmit} className="flex space-x-2">
           <textarea
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="메시지를 입력하세요..."
-            className="flex-1 p-3 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800 placeholder-gray-500"
             rows={2}
             disabled={isGenerating || !isHealthy}
           />
           <button
             type="submit"
             disabled={!inputMessage.trim() || isGenerating || !isHealthy}
-            className="px-6 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isGenerating ? "전송 중..." : "전송"}
           </button>

@@ -1,8 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { useOllamaModels, useOllamaHealth } from "@/lib/mcp/use-ollama";
-import { ollamaClient } from "@/lib/mcp/ollama-client";
+import {
+  useOllamaModels,
+  useOllamaHealth,
+  useOllamaPull,
+} from "@/lib/mcp/use-ollama";
 
 interface OllamaModelManagerProps {
   className?: string;
@@ -11,37 +14,28 @@ interface OllamaModelManagerProps {
 export default function OllamaModelManager({
   className = "",
 }: OllamaModelManagerProps) {
-  const [isPulling, setIsPulling] = useState(false);
-  const [pullProgress, setPullProgress] = useState("");
   const [newModelName, setNewModelName] = useState("");
 
   const { models, isLoading, error, refreshModels } = useOllamaModels();
   const { isHealthy, checkHealth } = useOllamaHealth();
+  const { isPulling, progress, error: pullError, pullModel } = useOllamaPull();
 
-  // 컴포넌트 마운트 시 헬스 체크 실행
+  // 컴포넌트 마운트 시 헬스 체크 및 모델 목록 로드
   React.useEffect(() => {
     checkHealth();
-  }, [checkHealth]);
+    refreshModels();
+  }, [checkHealth, refreshModels]);
 
   const handlePullModel = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newModelName.trim() || isPulling) return;
 
-    setIsPulling(true);
-    setPullProgress("모델 다운로드 중...");
-
     try {
-      await ollamaClient.pullModel(newModelName.trim());
-      setPullProgress("모델 다운로드 완료!");
+      await pullModel(newModelName.trim());
       await refreshModels();
       setNewModelName("");
-    } catch (error) {
-      setPullProgress(
-        `오류: ${error instanceof Error ? error.message : "모델 다운로드 실패"}`
-      );
-    } finally {
-      setIsPulling(false);
-      setTimeout(() => setPullProgress(""), 3000);
+    } catch {
+      // 에러는 useOllamaPull 훅에서 처리됨
     }
   };
 
@@ -61,7 +55,7 @@ export default function OllamaModelManager({
     <div className={`space-y-6 ${className}`}>
       {/* 헤더 */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Ollama 모델 관리</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Ollama 모델 관리</h2>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <div
@@ -69,7 +63,7 @@ export default function OllamaModelManager({
                 isHealthy ? "bg-green-500" : "bg-red-500"
               }`}
             />
-            <span className="text-sm text-gray-600">
+            <span className="text-sm font-medium text-gray-700">
               {isHealthy === null
                 ? "Checking..."
                 : isHealthy
@@ -80,7 +74,7 @@ export default function OllamaModelManager({
           <button
             onClick={refreshModels}
             disabled={isLoading}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
+            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
             {isLoading ? "새로고침 중..." : "새로고침"}
           </button>
@@ -88,71 +82,79 @@ export default function OllamaModelManager({
       </div>
 
       {/* 새 모델 다운로드 */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h3 className="text-lg font-medium mb-3">새 모델 다운로드</h3>
+      <div className="bg-white border border-gray-200 p-4 rounded-lg">
+        <h3 className="text-lg font-semibold text-gray-800 mb-3">
+          새 모델 다운로드
+        </h3>
         <form onSubmit={handlePullModel} className="flex space-x-2">
           <input
             type="text"
             value={newModelName}
             onChange={(e) => setNewModelName(e.target.value)}
             placeholder="모델명 (예: llama3, codellama, mistral)"
-            className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800 placeholder-gray-500"
             disabled={isPulling || !isHealthy}
           />
           <button
             type="submit"
             disabled={!newModelName.trim() || isPulling || !isHealthy}
-            className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:opacity-50"
+            className="px-6 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 disabled:opacity-50 transition-colors"
           >
             {isPulling ? "다운로드 중..." : "다운로드"}
           </button>
         </form>
 
-        {pullProgress && (
+        {progress && (
           <div className="mt-2 p-2 bg-blue-50 text-blue-700 rounded text-sm">
-            {pullProgress}
+            {progress}
           </div>
         )}
       </div>
 
       {/* 에러 메시지 */}
-      {error && (
+      {(error || pullError) && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-600">{error}</p>
+          <p className="text-red-600">{error || pullError}</p>
         </div>
       )}
 
       {/* 모델 목록 */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">사용 가능한 모델</h3>
+        <h3 className="text-lg font-semibold text-gray-800">
+          사용 가능한 모델
+        </h3>
 
         {isLoading ? (
           <div className="text-center py-8">
             <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto" />
-            <p className="mt-2 text-gray-600">모델 목록을 불러오는 중...</p>
+            <p className="mt-2 text-gray-700 font-medium">
+              모델 목록을 불러오는 중...
+            </p>
           </div>
         ) : models.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <p>설치된 모델이 없습니다.</p>
-            <p className="text-sm mt-1">위에서 새 모델을 다운로드해보세요.</p>
+          <div className="text-center py-8 text-gray-600">
+            <p className="font-medium">설치된 모델이 없습니다.</p>
+            <p className="text-sm mt-1 text-gray-500">
+              위에서 새 모델을 다운로드해보세요.
+            </p>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {models.map((model) => (
               <div
                 key={model.name}
-                className="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
               >
                 <div className="flex items-start justify-between mb-2">
-                  <h4 className="font-medium text-gray-900 truncate">
+                  <h4 className="font-semibold text-gray-900 truncate">
                     {model.name}
                   </h4>
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">
                     {model.details.family}
                   </span>
                 </div>
 
-                <div className="space-y-1 text-sm text-gray-600">
+                <div className="space-y-1 text-sm text-gray-700">
                   <div className="flex justify-between">
                     <span>크기:</span>
                     <span>{formatFileSize(model.size)}</span>

@@ -324,3 +324,55 @@ export function useOllamaHealth() {
     checkHealth,
   };
 }
+
+/**
+ * Ollama 모델 다운로드를 위한 훅
+ */
+export function useOllamaPull() {
+  const [isPulling, setIsPulling] = useState(false);
+  const [progress, setProgress] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const pullModel = useCallback(async (modelName: string) => {
+    setIsPulling(true);
+    setError(null);
+    setProgress("모델 다운로드 중...");
+
+    try {
+      const response = await fetch("/api/ollama/pull", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ model: modelName }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setProgress("모델 다운로드 완료!");
+        return data.result;
+      } else {
+        throw new Error(data.error || "Failed to pull model");
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Pull failed";
+      setError(errorMessage);
+      setProgress(`오류: ${errorMessage}`);
+      throw err;
+    } finally {
+      setIsPulling(false);
+      setTimeout(() => {
+        setProgress("");
+        setError(null);
+      }, 3000);
+    }
+  }, []);
+
+  return {
+    isPulling,
+    progress,
+    error,
+    pullModel,
+  };
+}
