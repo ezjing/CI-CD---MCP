@@ -1,0 +1,70 @@
+# AWS 배포 설정 가이드
+# 이 파일은 AWS 리소스 설정을 위한 참고용입니다.
+
+# 1. S3 버킷 생성
+# aws s3 mb s3://nextjs-cicd-mcp-practice-bucket --region ap-northeast-2
+# aws s3 mb s3://nextjs-cicd-mcp-practice-staging-bucket --region ap-northeast-2
+
+# 2. S3 버킷 정책 설정 (CloudFront OAI용)
+# {
+#   "Version": "2012-10-17",
+#   "Statement": [
+#     {
+#       "Sid": "AllowCloudFrontServicePrincipal",
+#       "Effect": "Allow",
+#       "Principal": {
+#         "Service": "cloudfront.amazonaws.com"
+#       },
+#       "Action": "s3:GetObject",
+#       "Resource": "arn:aws:s3:::nextjs-cicd-mcp-practice-bucket/*",
+#       "Condition": {
+#         "StringEquals": {
+#           "AWS:SourceArn": "arn:aws:cloudfront::ACCOUNT_ID:distribution/DISTRIBUTION_ID"
+#         }
+#       }
+#     }
+#   ]
+# }
+
+# 3. CloudFront 배포 생성
+# - Origin: S3 버킷
+# - Behaviors:
+#   - Default (*): TTL 0 (Next.js API routes)
+#   - _next/static/*: TTL 31536000 (1년)
+#   - static/*: TTL 86400 (1일)
+
+# 4. GitHub Secrets 설정
+# AWS_ACCESS_KEY_ID: IAM 사용자의 Access Key ID
+# AWS_SECRET_ACCESS_KEY: IAM 사용자의 Secret Access Key
+# SLACK_WEBHOOK_URL: Slack 알림용 웹훅 URL (선택사항)
+
+# 5. IAM 정책 (GitHub Actions용)
+# {
+#   "Version": "2012-10-17",
+#   "Statement": [
+#     {
+#       "Effect": "Allow",
+#       "Action": [
+#         "s3:GetObject",
+#         "s3:PutObject",
+#         "s3:DeleteObject",
+#         "s3:ListBucket"
+#       ],
+#       "Resource": [
+#         "arn:aws:s3:::nextjs-cicd-mcp-practice-bucket",
+#         "arn:aws:s3:::nextjs-cicd-mcp-practice-bucket/*",
+#         "arn:aws:s3:::nextjs-cicd-mcp-practice-staging-bucket",
+#         "arn:aws:s3:::nextjs-cicd-mcp-practice-staging-bucket/*"
+#       ]
+#     },
+#     {
+#       "Effect": "Allow",
+#       "Action": [
+#         "cloudfront:CreateInvalidation",
+#         "cloudfront:GetInvalidation",
+#         "cloudfront:ListInvalidations"
+#       ],
+#       "Resource": "*"
+#     }
+#   ]
+# }
