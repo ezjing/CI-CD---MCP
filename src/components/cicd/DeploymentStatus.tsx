@@ -156,26 +156,28 @@ export default function DeploymentStatus({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-gray-600">버전:</span>
-                <span className="ml-2 font-medium">{deployment.version}</span>
+                <span className="text-gray-700">버전:</span>
+                <span className="ml-2 font-medium text-gray-800">
+                  {deployment.version}
+                </span>
               </div>
               <div>
-                <span className="text-gray-600">마지막 배포:</span>
-                <span className="ml-2 font-medium">
+                <span className="text-gray-700">마지막 배포:</span>
+                <span className="ml-2 font-medium text-gray-800">
                   {formatDate(deployment.lastDeployment)}
                 </span>
               </div>
             </div>
 
             <div className="mt-3 flex space-x-2">
-              <button className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+              <button className="px-3 py-1 text-xs bg-gray-100 text-gray-800 rounded hover:bg-gray-200 font-medium">
                 로그 보기
               </button>
-              <button className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+              <button className="px-3 py-1 text-xs bg-gray-100 text-gray-800 rounded hover:bg-gray-200 font-medium">
                 메트릭 보기
               </button>
               {deployment.environment === "staging" && (
-                <button className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+                <button className="px-3 py-1 text-xs bg-blue-100 text-blue-800 rounded hover:bg-blue-200 font-medium">
                   프로덕션 배포
                 </button>
               )}
@@ -186,10 +188,10 @@ export default function DeploymentStatus({
 
       {deploymentContext ? (
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <h4 className="font-semibold text-blue-800 mb-2">
+          <h4 className="font-semibold text-blue-900 mb-2">
             MCP 컨텍스트 정보
           </h4>
-          <pre className="text-xs text-blue-700 overflow-auto">
+          <pre className="text-xs text-blue-800 overflow-auto">
             {JSON.stringify(deploymentContext, null, 2)}
           </pre>
         </div>

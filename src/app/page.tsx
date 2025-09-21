@@ -7,6 +7,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
+        {/* 제목 섹션 */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
             Next.js CI/CD & MCP 실습 프로젝트
@@ -17,9 +18,10 @@ export default function Home() {
           </p>
         </div>
 
+        {/* 메인 그리드 */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          <MCPToolPanel />
-          <DeploymentStatus />
+          <MCPToolPanel /> {/* MCP 도구 패널 */}
+          <DeploymentStatus /> {/* 배포 상태 */}
         </div>
 
         {/* Ollama 섹션 */}
@@ -29,10 +31,10 @@ export default function Home() {
           </h2>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
             <div className="bg-white rounded-lg shadow-lg">
-              <OllamaChat className="h-96" />
+              <OllamaChat className="h-96" /> {/* AI 채팅 */}
             </div>
             <div className="bg-white rounded-lg shadow-lg p-6">
-              <OllamaModelManager />
+              <OllamaModelManager /> {/* 모델 관리 */}
             </div>
           </div>
         </div>

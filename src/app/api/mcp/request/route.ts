@@ -65,7 +65,7 @@ async function handleMCPRequest(
                 },
                 model: {
                   type: "string",
-                  description: "사용할 모델명 (기본값: llama3)",
+                  description: "사용할 모델명 (기본값: tinyllama)",
                 },
                 temperature: {
                   type: "number",
@@ -85,7 +85,7 @@ async function handleMCPRequest(
                 message: { type: "string", description: "사용자 메시지" },
                 model: {
                   type: "string",
-                  description: "사용할 모델명 (기본값: llama3)",
+                  description: "사용할 모델명 (기본값: tinyllama)",
                 },
                 temperature: {
                   type: "number",
@@ -133,11 +133,11 @@ async function executeTool(toolName: string, args: Record<string, unknown>) {
     case "ollama_generate":
       try {
         const generateResult = await ollamaClient.generate({
-          model: (args.model as string) || "llama3",
+          model: (args.model as string) || "tinyllama",
           prompt: args.prompt as string,
           options: {
             temperature: (args.temperature as number) || 0.7,
-            num_predict: (args.max_tokens as number) || 1000,
+            num_predict: (args.max_tokens as number) || 500,
           },
         });
         return {
@@ -158,12 +158,13 @@ async function executeTool(toolName: string, args: Record<string, unknown>) {
     case "ollama_chat":
       try {
         const chatResult = await ollamaClient.chat({
-          model: (args.model as string) || "llama3",
+          model: (args.model as string) || "tinyllama",
           messages: [{ role: "user", content: args.message as string }],
           options: {
             temperature: (args.temperature as number) || 0.7,
           },
         });
+
         return {
           success: true,
           response: chatResult.response,

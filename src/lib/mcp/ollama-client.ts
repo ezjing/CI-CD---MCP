@@ -420,5 +420,5 @@ export class OllamaClient {
 // 기본 Ollama 클라이언트 인스턴스
 export const ollamaClient = new OllamaClient(
   process.env.NEXT_PUBLIC_OLLAMA_BASE_URL || "http://localhost:11434",
-  process.env.NEXT_PUBLIC_DEFAULT_AI_MODEL || "llama3"
+  process.env.NEXT_PUBLIC_DEFAULT_AI_MODEL || "tinyllama"
 );
